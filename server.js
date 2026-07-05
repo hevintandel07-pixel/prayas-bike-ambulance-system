@@ -150,72 +150,98 @@ app.get("/drivers", isAdmin, async (req, res) => {
 
 app.post("/drivers/add", isAdmin, async (req, res) => {
 
-    const driver = await Driver.create(req.body);
+    try {
 
-    const userExists = await User.findOne({
-        username: driver.driverId,
-        role: "driver"
-    });
+        const driver = await Driver.create(req.body);
 
-    if (!userExists) {
-        await User.create({
-            name: driver.name,
+        const userExists = await User.findOne({
             username: driver.driverId,
-            password: driver.mobile,
-            role: "driver",
-            isActive: true
+            role: "driver"
         });
-    }
 
-    res.redirect("/drivers");
+        if (!userExists) {
+            await User.create({
+                name: driver.name,
+                username: driver.driverId,
+                password: driver.mobile,
+                role: "driver",
+                isActive: true
+            });
+        }
+
+        res.redirect("/drivers");
+
+    } catch (error) {
+
+        console.log(error);
+        res.send("Driver Add Error");
+
+    }
 
 });
 
 app.post("/drivers/update/:id", isAdmin, async (req, res) => {
 
-    const oldDriver = await Driver.findById(req.params.id);
+    try {
 
-    const updatedDriver = await Driver.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-    );
+        const oldDriver = await Driver.findById(req.params.id);
 
-    await User.findOneAndUpdate(
-        {
-            username: oldDriver.driverId,
-            role: "driver"
-        },
-        {
-            name: updatedDriver.name,
-            username: updatedDriver.driverId,
-            password: updatedDriver.mobile,
-            role: "driver",
-            isActive: true
-        },
-        {
-            upsert: true
-        }
-    );
+        const updatedDriver = await Driver.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
 
-    res.redirect("/drivers");
+        await User.findOneAndUpdate(
+            {
+                username: oldDriver.driverId,
+                role: "driver"
+            },
+            {
+                name: updatedDriver.name,
+                username: updatedDriver.driverId,
+                password: updatedDriver.mobile,
+                role: "driver",
+                isActive: true
+            },
+            {
+                upsert: true
+            }
+        );
 
-});
+        res.redirect("/drivers");
 
-app.get("/drivers/delete/:id", isAdmin, async (req, res) => {
+    } catch (error) {
 
-    const driver = await Driver.findById(req.params.id);
+        console.log(error);
+        res.send("Driver Update Error");
 
-    if (driver) {
-        await User.findOneAndDelete({
-            username: driver.driverId,
-            role: "driver"
-        });
     }
 
-    await Driver.findByIdAndDelete(req.params.id);
+});
+app.get("/drivers/delete/:id", isAdmin, async (req, res) => {
 
-    res.redirect("/drivers");
+    try {
+
+        const driver = await Driver.findById(req.params.id);
+
+        if (driver) {
+            await User.findOneAndDelete({
+                username: driver.driverId,
+                role: "driver"
+            });
+        }
+
+        await Driver.findByIdAndDelete(req.params.id);
+
+        res.redirect("/drivers");
+
+    } catch (error) {
+
+        console.log(error);
+        res.send("Driver Delete Error");
+
+    }
 
 });
 
@@ -372,66 +398,116 @@ app.get("/reports", isAdmin, async (req, res) => {
 
 app.get("/driver-dashboard", isDriver, async (req, res) => {
 
-    const driver = await Driver.findOne({
-        name: req.session.user.name
-    });
-
-    if (!driver) {
-        return res.render("driver/driver-dashboard", {
-            totalAssigned: 0,
-            pendingCallsCount: 0,
-            onRescueCount: 0,
-            completedCount: 0
+    try {
+        const driver = await Driver.findOne({
+            driverId: req.session.user.username
         });
+
+        if (!driver) {
+            return res.render("driver/driver-dashboard", {
+                totalAssigned: 0,
+                pendingCallsCount: 0,
+                onRescueCount: 0,
+                completedCount: 0
+            });
+        }
+
+        const totalAssigned = await RescueCall.countDocuments({ assignedDriver: driver.name });
+        const pendingCallsCount = await RescueCall.countDocuments({ assignedDriver: driver.name, status: "Pending" });
+        const onRescueCount = await RescueCall.countDocuments({ assignedDriver: driver.name, status: "Assigned" });
+        const completedCount = await RescueCall.countDocuments({ assignedDriver: driver.name, status: "Completed" });
+
+        res.render("driver/driver-dashboard", {
+            totalAssigned,
+            pendingCallsCount,
+            onRescueCount,
+            completedCount
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.send("Driver Dashboard Error");
     }
 
-    const totalAssigned = await RescueCall.countDocuments({
-        assignedDriver: driver.name
-    });
-
-    const pendingCallsCount = await RescueCall.countDocuments({
-        assignedDriver: driver.name,
-        status: "Pending"
-    });
-
-    const onRescueCount = await RescueCall.countDocuments({
-    assignedDriver: driver.name,
-    status: "Assigned"
 });
 
-    const completedCount = await RescueCall.countDocuments({
-        assignedDriver: driver.name,
-        status: "Completed"
-    });
+app.get("/driver-dashboard", isDriver, async (req, res) => {
 
-    res.render("driver/driver-dashboard", {
-        totalAssigned,
-        pendingCallsCount,
-        onRescueCount,
-        completedCount
-    });
+    try {
+
+        const driver = await Driver.findOne({
+            driverId: req.session.user.username
+        });
+
+        if (!driver) {
+            return res.render("driver/driver-dashboard", {
+                totalAssigned: 0,
+                pendingCallsCount: 0,
+                onRescueCount: 0,
+                completedCount: 0
+            });
+        }
+
+        const totalAssigned = await RescueCall.countDocuments({
+            assignedDriver: driver.name
+        });
+
+        const pendingCallsCount = await RescueCall.countDocuments({
+            assignedDriver: driver.name,
+            status: "Pending"
+        });
+
+        const onRescueCount = await RescueCall.countDocuments({
+            assignedDriver: driver.name,
+            status: "Assigned"
+        });
+
+        const completedCount = await RescueCall.countDocuments({
+            assignedDriver: driver.name,
+            status: "Completed"
+        });
+
+        res.render("driver/driver-dashboard", {
+            totalAssigned,
+            pendingCallsCount,
+            onRescueCount,
+            completedCount
+        });
+
+    } catch (error) {
+
+        console.log(error);
+        res.send("Driver Dashboard Error");
+
+    }
 
 });
 
 app.get("/driver-calls", isDriver, async (req, res) => {
 
-    const driver = await Driver.findOne({
-        name: req.session.user.name
-    });
-
-    if (!driver) {
-        return res.render("driver/driver-calls", {
-            assignedCalls: []
+    try {
+        const driver = await Driver.findOne({
+            driverId: req.session.user.username
         });
+
+        if (!driver) {
+            return res.render("driver/driver-calls", {
+                assignedCalls: []
+            });
+        }
+
+        const assignedCalls = await RescueCall.find({
+            assignedDriver: driver.name
+        }).sort({ createdAt: -1 });
+
+        res.render("driver/driver-calls", {
+            assignedCalls
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.send("Driver Calls Error");
     }
-
-    const assignedCalls = await RescueCall.find({
-        assignedDriver: driver.name
-    }).sort({ createdAt: -1 });
-
-    res.render("driver/driver-calls", {
-        assignedCalls
-    });
 
 });
 
