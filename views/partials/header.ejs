@@ -21,14 +21,28 @@
     <img src="/images/prayas-logo.png" class="main-logo">
 
     <div class="header-links">
-        <a href="/dashboard">Dashboard</a>
-        <span>|</span>
-        <a href="/new-call">New Call</a>
-        <span>|</span>
-        <a href="/reports">Reports</a>
-        <span>|</span>
-        <a href="/change-password">Change Password</a>
-        <span>|</span>
-        <a href="/logout">Logout</a>
+
+        <% if (typeof user !== "undefined" && user && user.role === "driver") { %>
+
+            <a href="/driver-dashboard">Dashboard</a>
+            <span>|</span>
+            <a href="/driver-calls">My Calls</a>
+            <span>|</span>
+            <a href="/logout">Logout</a>
+
+        <% } else { %>
+
+            <a href="/dashboard">Dashboard</a>
+            <span>|</span>
+            <a href="/new-call">New Call</a>
+            <span>|</span>
+            <a href="/reports">Reports</a>
+            <span>|</span>
+            <a href="/change-password">Change Password</a>
+            <span>|</span>
+            <a href="/logout">Logout</a>
+
+        <% } %>
+
     </div>
 </header>
