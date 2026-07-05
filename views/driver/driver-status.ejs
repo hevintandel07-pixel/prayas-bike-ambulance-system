@@ -1,0 +1,111 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/driver-navbar") %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Driver Status</h1>
+            <p>Update your current duty status and location.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-cards">
+
+        <div class="dash-card">
+            <h3>Driver</h3>
+            <h2><%= driver.name %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Current Status</h3>
+            <h2><%= driver.status %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Assigned Ambulance</h3>
+            <h2><%= driver.assignedAmbulance %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Location</h3>
+            <h2><%= driver.location %></h2>
+        </div>
+
+    </div>
+
+    <form
+        class="modal-form workflow-form"
+        action="/driver-status/update"
+        method="POST">
+
+        <div class="workflow-box">
+
+            <h2>Update Driver Status</h2>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>Status</label>
+
+                    <select name="status" required>
+
+                        <option value="Available"
+                            <%= driver.status==="Available" ? "selected" : "" %>>
+                            Available
+                        </option>
+
+                        <option value="On Rescue"
+                            <%= driver.status==="On Rescue" ? "selected" : "" %>>
+                            On Rescue
+                        </option>
+
+                        <option value="Off Duty"
+                            <%= driver.status==="Off Duty" ? "selected" : "" %>>
+                            Off Duty
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Current Location</label>
+
+                    <input
+                        type="text"
+                        name="location"
+                        value="<%= driver.location %>"
+                        required>
+
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <a href="/driver-dashboard"
+                   class="cancel-btn">
+                    Back
+                </a>
+
+                <button
+                    type="submit"
+                    class="save-btn">
+
+                    Update Status
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
+
+<%- include("../partials/footer") %>

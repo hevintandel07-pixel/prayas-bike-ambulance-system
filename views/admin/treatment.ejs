@@ -1,0 +1,138 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<% const treatmentList = typeof treatments !== "undefined" ? treatments : []; %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Treatment Management</h1>
+            <p>Maintain animal treatment details, medicines, doctors and recovery status.</p>
+        </div>
+
+        <button class="primary-btn" onclick="openTreatmentModal()">+ Add Treatment</button>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card"><h3>Total Treatments</h3><h2><%= treatmentList.length %></h2></div>
+        <div class="dash-card"><h3>Under Treatment</h3><h2><%= treatmentList.filter(t => t.status === "Under Treatment").length %></h2></div>
+        <div class="dash-card"><h3>Recovered</h3><h2><%= treatmentList.filter(t => t.status === "Recovered").length %></h2></div>
+        <div class="dash-card"><h3>Critical</h3><h2><%= treatmentList.filter(t => t.status === "Critical").length %></h2></div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Treatment ID</th>
+                <th>Animal</th>
+                <th>Doctor</th>
+                <th>Treatment</th>
+                <th>Medicine</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (treatmentList.length === 0) { %>
+                <tr><td colspan="6">No treatment records added yet.</td></tr>
+            <% } %>
+
+            <% treatmentList.forEach(treatment => { %>
+                <tr>
+                    <td><%= treatment.treatmentId %></td>
+                    <td><%= treatment.animal %></td>
+                    <td><%= treatment.doctor %></td>
+                    <td><%= treatment.treatment %></td>
+                    <td><%= treatment.medicine %></td>
+                    <td>
+                        <% if (treatment.status === "Recovered") { %>
+                            <span class="status available">Recovered</span>
+                        <% } else if (treatment.status === "Critical") { %>
+                            <span class="status busy">Critical</span>
+                        <% } else { %>
+                            <span class="status pending">Under Treatment</span>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</section>
+
+<div class="modal-overlay" id="treatmentModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Add Treatment</h2>
+            <button onclick="closeTreatmentModal()">×</button>
+        </div>
+
+        <form class="modal-form" action="/treatment/add" method="POST">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Treatment ID</label>
+                    <input type="text" name="treatmentId" placeholder="TR-003" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Animal Type</label>
+                    <select name="animal" required>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Cow">Cow</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Doctor Name</label>
+                    <input type="text" name="doctor" placeholder="Enter doctor name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Under Treatment">Under Treatment</option>
+                        <option value="Recovered">Recovered</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Treatment Details</label>
+                <textarea name="treatment" placeholder="Enter treatment details" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Medicine Given</label>
+                <textarea name="medicine" placeholder="Enter medicine details" required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeTreatmentModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Treatment</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function openTreatmentModal() {
+        document.getElementById("treatmentModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeTreatmentModal() {
+        document.getElementById("treatmentModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+</script>
+
+<%- include("../partials/footer") %>

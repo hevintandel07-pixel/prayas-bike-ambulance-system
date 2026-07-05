@@ -1,0 +1,259 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<% const callList = typeof rescueCalls !== "undefined" ? rescueCalls : []; %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>New Rescue Call</h1>
+            <p>Register animal rescue calls and assign ambulance with driver details.</p>
+        </div>
+
+        <button class="primary-btn" onclick="openCallModal()">+ Add New Call</button>
+
+        <div style="margin:20px 0;">
+    <textarea id="pasteText" placeholder="Paste rescue message here..." style="width:100%; height:130px; padding:12px; border-radius:8px;"></textarea>
+    <br><br>
+    <button class="primary-btn" onclick="autoFillCall()">Auto Fill Form</button>
+</div>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card"><h3>Total Calls</h3><h2><%= callList.length %></h2></div>
+        <div class="dash-card"><h3>Pending</h3><h2><%= callList.filter(c => c.status === "Pending").length %></h2></div>
+        <div class="dash-card"><h3>Assigned</h3><h2><%= callList.filter(c => c.status === "Assigned").length %></h2></div>
+        <div class="dash-card"><h3>Completed</h3><h2><%= callList.filter(c => c.status === "Completed").length %></h2></div>
+    </div>
+
+    <div style="margin:20px 0;">
+        <input
+            type="text"
+            id="callSearch"
+            placeholder="Search Call by ID, Animal, Caller, Location or Driver..."
+            style="width:430px; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:16px;">
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Call ID</th>
+                <th>Animal</th>
+                <th>Caller</th>
+                <th>Location</th>
+                <th>Priority</th>
+                <th>Driver</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (callList.length === 0) { %>
+                <tr><td colspan="7">No rescue calls added yet.</td></tr>
+            <% } %>
+
+            <% callList.forEach(call => { %>
+                <tr>
+                    <td><%= call.caseId %></td>
+                    <td><%= call.animal %></td>
+                    <td><%= call.callerName %></td>
+                    <td><%= call.location %></td>
+                    <td><%= call.priority %></td>
+                    <td><%= call.assignedDriver %></td>
+                    <td>
+                        <% if (call.status === "Completed") { %>
+                            <span class="status available">Completed</span>
+                        <% } else if (call.status === "Assigned") { %>
+                            <span class="status busy">Assigned</span>
+                        <% } else { %>
+                            <span class="status pending">Pending</span>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</section>
+
+<div class="modal-overlay" id="callModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Add Rescue Call</h2>
+            <button onclick="closeCallModal()">×</button>
+        </div>
+
+        <form class="modal-form" action="/new-call/add" method="POST">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Call ID</label>
+                    <input type="text" name="caseId" placeholder="CALL-003" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Animal Type</label>
+                    <select name="animal" required>
+    <option value="Dog">Dog</option>
+    <option value="Cat">Cat</option>
+    <option value="Cow">Cow</option>
+    <option value="Bird">Bird</option>
+    <option value="Snake">Snake</option>
+    <option value="Monkey">Monkey</option>
+    <option value="Peacock">Peacock</option>
+    <option value="Other">Other</option>
+</select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Informer Name</label>
+                    <input type="text" name="callerName" placeholder="Enter informer name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" name="mobile" placeholder="Enter contact number" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rescue Location</label>
+                    <input type="text" name="location" placeholder="Enter rescue location" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Assigned Driver</label>
+                    <select name="assignedDriver" required>
+                        <option value="">Select Driver</option>
+                        <% drivers.forEach(driver => { %>
+                            <option value="<%= driver.name %>"><%= driver.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" placeholder="Enter rescue case details" required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeCallModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Call</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCallModal() {
+        document.getElementById("callModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeCallModal() {
+        document.getElementById("callModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    document.getElementById("callSearch").addEventListener("keyup", function () {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll(".data-table tbody tr");
+
+        rows.forEach(function(row) {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? "" : "none";
+        });
+    });
+</script>
+
+
+<script>
+function autoFillCall() {
+    const text = document.getElementById("pasteText").value;
+
+    openCallModal();
+
+    const receipt = text.match(/Receipt Id:\s*(\d+)/i) || text.match(/^(\d+)/);
+    const caller = text.match(/Caller:\s*([0-9]+)/i) || text.match(/(\d{10})/);
+    const jobId = text.match(/Job ID:\s*([A-Z0-9-]+)/i) || text.match(/(\d{2}-\d{4}-[A-Z]+)/i);
+    const area = text.match(/Area:\s*(.+)/i);
+    const jobType = text.match(/Job Type:\s*(.+)/i);
+    const address = text.match(/Address:\s*(.+)/i);
+
+    const words = text.split(/\s+/);
+    let simpleArea = "";
+    let simpleAnimal = "";
+    let simpleDriver = "";
+
+    if (!area && words.length > 6) {
+        simpleArea = words[4] + " " + (words[5] || "");
+        simpleAnimal = words[6] || "";
+        simpleDriver = words[7] || "";
+    }
+
+    document.querySelector('[name="caseId"]').value = jobId ? jobId[1] : (receipt ? "CALL-" + receipt[1] : "");
+    document.querySelector('[name="mobile"]').value = caller ? caller[1] : "";
+    document.querySelector('[name="location"]').value = area ? area[1].trim() : simpleArea.trim();
+    const animalField = document.querySelector('[name="animal"]');
+const animalValue = jobType ? jobType[1].trim() : simpleAnimal;
+
+let matchedAnimal = false;
+
+if (animalField) {
+    for (let option of animalField.options) {
+        if (option.value.toLowerCase() === animalValue.toLowerCase()) {
+            animalField.value = option.value;
+            matchedAnimal = true;
+            break;
+        }
+    }
+
+    if (!matchedAnimal && animalValue) {
+        animalField.value = "Other";
+    }
+}
+    document.querySelector('[name="description"]').value = address ? address[1].trim() : text;
+    document.querySelector('[name="priority"]').value = "Medium";
+    document.querySelector('[name="status"]').value = "Pending";
+
+    const driverSelect = document.querySelector('[name="assignedDriver"]');
+    if (simpleDriver) {
+        for (let option of driverSelect.options) {
+            if (option.value.toLowerCase().includes(simpleDriver.toLowerCase())) {
+                driverSelect.value = option.value;
+                break;
+            }
+        }
+    }
+}
+</script>
+
+<%- include("../partials/footer") %>

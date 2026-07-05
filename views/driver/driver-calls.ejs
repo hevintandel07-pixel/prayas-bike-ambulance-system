@@ -1,0 +1,112 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/driver-navbar") %>
+
+<% const callList = (typeof rescueCalls !== "undefined") ? rescueCalls : ((typeof assignedCalls !== "undefined") ? assignedCalls : []); %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>My Rescue Calls</h1>
+            <p>View your assigned rescue calls and start rescue process.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-cards">
+
+        <div class="dash-card">
+            <h3>Total Assigned</h3>
+            <h2><%= callList.length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Pending</h3>
+            <h2><%= callList.filter(call => call.status === "Pending").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Assigned</h3>
+            <h2><%= callList.filter(call => call.status === "Assigned").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Completed</h3>
+            <h2><%= callList.filter(call => call.status === "Completed").length %></h2>
+        </div>
+
+    </div>
+
+    <table class="data-table">
+
+        <thead>
+            <tr>
+                <th>Call ID</th>
+                <th>Animal</th>
+                <th>Caller</th>
+                <th>Mobile</th>
+                <th>Location</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <% if (callList.length === 0) { %>
+                <tr>
+                    <td colspan="8">No assigned calls found.</td>
+                </tr>
+            <% } %>
+
+            <% callList.forEach(call => { %>
+
+                <tr>
+                    <td><%= call.caseId %></td>
+                    <td><%= call.animal %></td>
+                    <td><%= call.callerName %></td>
+                    <td><%= call.mobile %></td>
+                    <td><%= call.location %></td>
+                    <td><%= call.priority %></td>
+
+                    <td>
+                        <% if (call.status === "Completed") { %>
+                            <span class="status available">Completed</span>
+                        <% } else if (call.status === "Assigned") { %>
+                            <span class="status busy">Assigned</span>
+                        <% } else { %>
+                            <span class="status pending">Pending</span>
+                        <% } %>
+                    </td>
+
+                    <td>
+                        <% if (call.status === "Pending") { %>
+                            <a href="/driver-call/accept/<%= call._id %>" class="action-btn">
+                                Accept
+                            </a>
+                        <% } else if (call.status === "Assigned") { %>
+                            <a href="/driver-workflow/<%= call._id %>" class="edit-btn">
+                                Start Rescue
+                            </a>
+                        <% } else { %>
+                            <span class="status available">Done</span>
+                        <% } %>
+                    </td>
+                </tr>
+
+            <% }) %>
+
+        </tbody>
+
+    </table>
+
+</section>
+
+<script>
+    setInterval(function () {
+        location.reload();
+    }, 10000);
+</script>
+
+<%- include("../partials/footer") %>

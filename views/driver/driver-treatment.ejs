@@ -1,0 +1,79 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/driver-navbar") %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Treatment Update</h1>
+            <p>Submit animal treatment details, medicine record and recovery notes.</p>
+        </div>
+    </div>
+
+    <form class="modal-form workflow-form" action="/driver-treatment/add" method="POST">
+
+        <div class="workflow-box">
+
+            <h2>Animal Treatment Details</h2>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Treatment ID</label>
+                    <input type="text" name="treatmentId" placeholder="TR-001" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Animal Type</label>
+                    <select name="animal" required>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Cow">Cow</option>
+                        <option value="Bird">Bird</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Doctor / Driver Name</label>
+                    <input type="text" name="doctor" value="<%= driverName %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Under Treatment">Under Treatment</option>
+                        <option value="Recovered">Recovered</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Treatment Details</label>
+                <textarea name="treatment" placeholder="Enter treatment details" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Medicine Given</label>
+                <textarea name="medicine" placeholder="Enter medicine details" required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <a href="/driver-dashboard" class="cancel-btn">Back</a>
+                <button type="submit" class="save-btn">Submit Treatment</button>
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
+
+<%- include("../partials/footer") %>

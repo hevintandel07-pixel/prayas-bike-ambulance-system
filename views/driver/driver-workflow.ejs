@@ -1,0 +1,113 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/driver-navbar") %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Rescue Workflow</h1>
+            <p>Complete the assigned rescue call step-by-step.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card"><h3>Call ID</h3><h2><%= rescueCall.caseId %></h2></div>
+        <div class="dash-card"><h3>Animal</h3><h2><%= rescueCall.animal %></h2></div>
+        <div class="dash-card"><h3>Priority</h3><h2><%= rescueCall.priority %></h2></div>
+        <div class="dash-card"><h3>Status</h3><h2><%= rescueCall.status %></h2></div>
+    </div>
+
+    <form class="modal-form workflow-form" action="/driver-workflow/complete/<%= rescueCall._id %>" method="POST">
+
+        <div class="workflow-box">
+            <h2>Caller Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Caller Name</label>
+                    <input type="text" value="<%= rescueCall.callerName %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Caller Mobile</label>
+                    <input type="text" value="<%= rescueCall.mobile %>" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Rescue Location</label>
+                <input type="text" value="<%= rescueCall.location %>" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea readonly><%= rescueCall.description %></textarea>
+            </div>
+        </div>
+
+        <div class="workflow-box">
+            <h2>Rescue Update</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" name="startTime">
+                </div>
+
+                <div class="form-group">
+                    <label>Reached Time</label>
+                    <input type="time" name="reachedTime">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start KM</label>
+                    <input type="number" name="startKM" placeholder="Enter start KM">
+                </div>
+
+                <div class="form-group">
+                    <label>End KM</label>
+                    <input type="number" name="endKM" placeholder="Enter end KM">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Call Result</label>
+                <select name="callResult">
+                    <option>Caller Responded</option>
+                    <option>Caller Not Responding</option>
+                    <option>Animal Not On Spot</option>
+                    <option>Animal Died</option>
+                    <option>Animal Run Away</option>
+                    <option>Already Treated</option>
+                    <option>Treated By Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Treatment Remark</label>
+                <textarea name="treatmentRemark" placeholder="Enter treatment or rescue remarks"></textarea>
+            </div>
+        </div>
+
+        <div class="workflow-box">
+            <h2>Complete Rescue</h2>
+
+            <div class="form-group">
+                <label>Final Remark</label>
+                <textarea name="finalRemark" placeholder="Enter final case remarks"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <a href="/driver-calls" class="cancel-btn">Back</a>
+            <button type="submit" class="save-btn">Mark As Completed</button>
+        </div>
+
+    </form>
+
+</section>
+
+<%- include("../partials/footer") %>

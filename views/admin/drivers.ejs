@@ -1,0 +1,349 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<% const driverList = typeof drivers !== "undefined" ? drivers : []; %>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Driver Management</h1>
+            <p>Manage all ambulance drivers, duty status and assigned vehicles.</p>
+        </div>
+
+        <button class="primary-btn" onclick="openDriverModal()">+ Add Driver</button>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card">
+            <h3>Total Drivers</h3>
+            <h2><%= driverList.length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Available</h3>
+            <h2><%= driverList.filter(driver => driver.status === "Available").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>On Rescue</h3>
+            <h2><%= driverList.filter(driver => driver.status === "On Rescue").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Off Duty</h3>
+            <h2><%= driverList.filter(driver => driver.status === "Off Duty").length %></h2>
+        </div>
+    </div>
+
+    <div style="margin:20px 0;">
+
+    <input
+        type="text"
+        id="driverSearch"
+        placeholder="Search Driver by Name, ID or Mobile..."
+        style="
+            width:350px;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:16px;
+        ">
+
+</div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Driver ID</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>License No.</th>
+                <th>Assigned Ambulance</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (driverList.length === 0) { %>
+                <tr>
+                    <td colspan="8">No drivers added yet.</td>
+                </tr>
+            <% } %>
+
+            <% driverList.forEach(driver => { %>
+                <tr>
+                    <td><%= driver.driverId %></td>
+                    <td><%= driver.name %></td>
+                    <td><%= driver.mobile %></td>
+                    <td><%= driver.licenseNo %></td>
+                    <td><%= driver.assignedAmbulance %></td>
+
+                    <td>
+                        <% if (driver.status === "Available") { %>
+                            <span class="status available">Available</span>
+                        <% } else if (driver.status === "On Rescue") { %>
+                            <span class="status busy">On Rescue</span>
+                        <% } else { %>
+                            <span class="status pending">Off Duty</span>
+                        <% } %>
+                    </td>
+
+                    <td><%= driver.location %></td>
+
+                    <td>
+                        <button
+                            class="edit-btn"
+                            onclick="openEditDriverModal(
+                                '<%= driver._id %>',
+                                '<%= driver.driverId %>',
+                                '<%= driver.name %>',
+                                '<%= driver.mobile %>',
+                                '<%= driver.licenseNo %>',
+                                '<%= driver.assignedAmbulance %>',
+                                '<%= driver.status %>',
+                                '<%= driver.location %>'
+                            )">
+                            Edit
+                        </button>
+
+                        <a
+                            href="/drivers/delete/<%= driver._id %>"
+                            class="delete-btn"
+                            onclick="return confirmDelete(event, this.href, 'driver')"
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</section>
+
+<div class="modal-overlay" id="driverModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Add Driver</h2>
+            <button onclick="closeDriverModal()">×</button>
+        </div>
+
+        <form class="modal-form" action="/drivers/add" method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Driver ID</label>
+                    <input type="text" name="driverId" placeholder="DR-003" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" name="name" placeholder="Enter driver name" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" name="mobile" placeholder="Enter mobile number" required>
+                </div>
+
+                <div class="form-group">
+                    <label>License Number</label>
+                    <input type="text" name="licenseNo" placeholder="Enter license number" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Assigned Ambulance</label>
+                    <select name="assignedAmbulance" required>
+
+    <option value="">Select Ambulance</option>
+
+    <% ambulances.forEach(ambulance => { %>
+
+        <option value="<%= ambulance.ambulanceId %>">
+            <%= ambulance.ambulanceId %>
+        </option>
+
+    <% }) %>
+
+</select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Available">Available</option>
+                        <option value="On Rescue">On Rescue</option>
+                        <option value="Off Duty">Off Duty</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <input type="text" name="location" placeholder="Enter current location" required>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDriverModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Driver</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editDriverModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Edit Driver</h2>
+            <button onclick="closeEditDriverModal()">×</button>
+        </div>
+
+        <form class="modal-form" id="editDriverForm" method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Driver ID</label>
+                    <input type="text" name="driverId" id="editDriverId" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" name="name" id="editName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" name="mobile" id="editMobile" required>
+                </div>
+
+                <div class="form-group">
+                    <label>License Number</label>
+                    <input type="text" name="licenseNo" id="editLicenseNo" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Assigned Ambulance</label>
+                    <select name="assignedAmbulance" id="editAssignedAmbulance" required>
+    <option value="">Select Ambulance</option>
+
+    <% ambulances.forEach(ambulance => { %>
+        <option value="<%= ambulance.ambulanceId %>">
+            <%= ambulance.ambulanceId %>
+        </option>
+    <% }) %>
+</select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="editStatus" required>
+                        <option value="Available">Available</option>
+                        <option value="On Rescue">On Rescue</option>
+                        <option value="Off Duty">Off Duty</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <input type="text" name="location" id="editLocation" required>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeEditDriverModal()">Cancel</button>
+                <button type="submit" class="save-btn">Update Driver</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openDriverModal() {
+        document.getElementById("driverModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeDriverModal() {
+        document.getElementById("driverModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    function openEditDriverModal(id, driverId, name, mobile, licenseNo, assignedAmbulance, status, location) {
+        document.getElementById("editDriverForm").action = "/drivers/update/" + id;
+
+        document.getElementById("editDriverId").value = driverId;
+        document.getElementById("editName").value = name;
+        document.getElementById("editMobile").value = mobile;
+        document.getElementById("editLicenseNo").value = licenseNo;
+        document.getElementById("editAssignedAmbulance").value = assignedAmbulance;
+        document.getElementById("editStatus").value = status;
+        document.getElementById("editLocation").value = location;
+
+        document.getElementById("editDriverModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeEditDriverModal() {
+        document.getElementById("editDriverModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    
+
+</script>
+
+<script>
+
+    function confirmDelete(event, url, itemName) {
+
+        event.preventDefault();
+
+        Swal.fire({
+            title: "Delete Driver?",
+            text: "This " + itemName + " will be permanently deleted.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, Delete",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Driver deleted successfully.",
+                    icon: "success",
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 1200);
+
+            }
+
+        });
+
+        return false;
+
+    }
+
+</script>
+
+<%- include("../partials/footer") %>

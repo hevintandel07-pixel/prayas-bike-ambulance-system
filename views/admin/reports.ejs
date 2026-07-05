@@ -1,0 +1,228 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<%
+const completionRate = totalCalls > 0 ? Math.round((completedCalls / totalCalls) * 100) : 0;
+const reportList = typeof driverReports !== "undefined" ? driverReports : [];
+%>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Reports</h1>
+            <p>Live summary of rescue calls, drivers, ambulances and treatments.</p>
+        </div>
+
+        <button class="primary-btn" onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card"><h3>Total Drivers</h3><h2><%= totalDrivers %></h2></div>
+        <div class="dash-card"><h3>Total Ambulances</h3><h2><%= totalAmbulances %></h2></div>
+        <div class="dash-card"><h3>Rescue Calls</h3><h2><%= totalCalls %></h2></div>
+        <div class="dash-card"><h3>Treatments</h3><h2><%= totalTreatments %></h2></div>
+        <div class="dash-card"><h3>Completed Calls</h3><h2><%= completedCalls %></h2></div>
+        <div class="dash-card"><h3>Completion Rate</h3><h2><%= completionRate %>%</h2></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; margin:30px 0;">
+        <div class="dash-card" style="height:360px;">
+            <h3 style="margin-bottom:20px;">Rescue Call Status</h3>
+            <div style="height:260px;">
+                <canvas id="callChart"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-card" style="height:360px;">
+            <h3 style="margin-bottom:20px;">Overall Statistics</h3>
+            <div style="height:260px;">
+                <canvas id="statsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <table class="data-table" id="summaryTable">
+        <thead>
+            <tr>
+                <th>Report Type</th>
+                <th>Total Count</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Completed Rescue Calls</td>
+                <td><%= completedCalls %></td>
+                <td><span class="status available">Completed</span></td>
+            </tr>
+
+            <tr>
+                <td>Pending Calls</td>
+                <td><%= pendingCalls %></td>
+                <td><span class="status pending">Pending</span></td>
+            </tr>
+
+            <tr>
+                <td>Assigned Calls</td>
+                <td><%= assignedCalls %></td>
+                <td><span class="status busy">Assigned</span></td>
+            </tr>
+
+            <tr>
+                <td>Completion Percentage</td>
+                <td><%= completionRate %>%</td>
+                <td><span class="status available">Live</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br><br>
+
+    <div class="page-header">
+        <div>
+            <h2>Driver Monthly Report</h2>
+            <p>Driver-wise call attendance and bike kilometer summary.</p>
+        </div>
+    </div>
+
+    <table class="data-table" id="driverReportTable">
+        <thead>
+            <tr>
+                <th>Driver</th>
+                <th>Bike / Ambulance</th>
+                <th>Total Calls</th>
+                <th>Completed</th>
+                <th>Pending</th>
+                <th>Assigned</th>
+                <th>Total KM</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (reportList.length === 0) { %>
+                <tr>
+                    <td colspan="7">No driver report available.</td>
+                </tr>
+            <% } %>
+
+            <% reportList.forEach(report => { %>
+                <tr>
+                    <td><%= report.driverName %></td>
+                    <td><%= report.ambulance %></td>
+                    <td><%= report.totalAssigned %></td>
+                    <td><%= report.totalCompleted %></td>
+                    <td><%= report.totalPending %></td>
+                    <td><%= report.totalAssignedRunning %></td>
+                    <td><%= report.totalKM %> KM</td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    window.addEventListener("load", function () {
+        new Chart(document.getElementById("callChart"), {
+            type: "bar",
+            data: {
+                labels: ["Completed", "Pending", "Assigned"],
+                datasets: [{
+                    label: "Call Status",
+                    data: [
+                        Number("<%= completedCalls %>"),
+                        Number("<%= pendingCalls %>"),
+                        Number("<%= assignedCalls %>")
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        new Chart(document.getElementById("statsChart"), {
+            type: "bar",
+            data: {
+                labels: ["Drivers", "Ambulances", "Calls", "Treatments"],
+                datasets: [{
+                    label: "Total Count",
+                    data: [
+                        Number("<%= totalDrivers %>"),
+                        Number("<%= totalAmbulances %>"),
+                        Number("<%= totalCalls %>"),
+                        Number("<%= totalTreatments %>")
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+
+    function tableToArray(tableId) {
+        const rows = document.querySelectorAll("#" + tableId + " tbody tr");
+        const data = [];
+
+        rows.forEach(row => {
+            const cols = row.querySelectorAll("td");
+
+            if (cols.length > 1) {
+                const rowData = [];
+
+                cols.forEach(col => {
+                    rowData.push(col.innerText.trim());
+                });
+
+                data.push(rowData);
+            }
+        });
+
+        return data;
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text("Prayas Bike Ambulance System", 20, 20);
+
+        doc.setFontSize(13);
+        doc.text("Live Rescue Report", 20, 30);
+
+        doc.autoTable({
+            startY: 45,
+            head: [["Report Type", "Total Count", "Status"]],
+            body: [
+                ["Total Drivers", "<%= totalDrivers %>", "Live"],
+                ["Total Ambulances", "<%= totalAmbulances %>", "Live"],
+                ["Total Rescue Calls", "<%= totalCalls %>", "Live"],
+                ["Completed Rescue Calls", "<%= completedCalls %>", "Completed"],
+                ["Pending Calls", "<%= pendingCalls %>", "Pending"],
+                ["Assigned Calls", "<%= assignedCalls %>", "Assigned"],
+                ["Total Treatments", "<%= totalTreatments %>", "Live"],
+                ["Completion Rate", "<%= completionRate %>%", "Live"]
+            ]
+        });
+
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 15,
+            head: [["Driver", "Bike", "Calls", "Completed", "Pending", "Assigned", "Total KM"]],
+            body: tableToArray("driverReportTable")
+        });
+
+        doc.save("Prayas_Bike_Ambulance_Report.pdf");
+    }
+</script>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,134 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<section class="dashboard-section">
+
+    <h1>Bike Ambulance Dashboard</h1>
+
+    <p class="dashboard-subtitle">
+        Live overview of rescue operations, ambulances, drivers and treatments.
+    </p>
+
+    <div class="dashboard-cards">
+
+        <div class="dash-card">
+            <h3>Total Ambulances</h3>
+            <h2><%= totalAmbulances %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Available Ambulances</h3>
+            <h2><%= availableAmbulances %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Total Drivers</h3>
+            <h2><%= totalDrivers %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Available Drivers</h3>
+            <h2><%= availableDrivers %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Total Rescue Calls</h3>
+            <h2><%= totalCalls %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Pending Calls</h3>
+            <h2><%= pendingCalls %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Total Treatments</h3>
+            <h2><%= totalTreatments %></h2>
+        </div>
+
+    </div>
+
+    <div class="dashboard-actions">
+
+        <a href="/new-call" class="action-btn">
+            ➕ Add Rescue Call
+        </a>
+
+        <a href="/drivers" class="action-btn secondary">
+            👨 Drivers
+        </a>
+
+        <a href="/ambulance" class="action-btn secondary">
+            🚑 Ambulances
+        </a>
+
+        <a href="/treatment" class="action-btn secondary">
+            💊 Treatments
+        </a>
+
+        <a href="/reports" class="action-btn secondary">
+            📊 Reports
+        </a>
+
+    </div>
+
+    <br><br>
+
+    <div class="page-header">
+        <div>
+            <h2>System Summary</h2>
+            <p>Current live statistics of the Bike Ambulance Management System.</p>
+        </div>
+    </div>
+
+    <table class="data-table">
+
+        <thead>
+            <tr>
+                <th>Module</th>
+                <th>Total</th>
+                <th>Current Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Drivers</td>
+                <td><%= totalDrivers %></td>
+                <td><span class="status available"><%= availableDrivers %> Available</span></td>
+            </tr>
+
+            <tr>
+                <td>Ambulances</td>
+                <td><%= totalAmbulances %></td>
+                <td><span class="status available"><%= availableAmbulances %> Available</span></td>
+            </tr>
+
+            <tr>
+                <td>Rescue Calls</td>
+                <td><%= totalCalls %></td>
+                <td><span class="status pending"><%= pendingCalls %> Pending</span></td>
+            </tr>
+
+            <tr>
+                <td>Treatments</td>
+                <td><%= totalTreatments %></td>
+                <td><span class="status available">Live Records</span></td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</section>
+
+
+<script>
+    setInterval(function () {
+        location.reload();
+    }, 10000);
+</script>
+
+<%- include("../partials/footer") %>

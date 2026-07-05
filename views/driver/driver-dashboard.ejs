@@ -1,0 +1,73 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/driver-navbar") %>
+
+<%
+    const assignedCalls = typeof totalAssigned !== "undefined" ? totalAssigned : 0;
+    const pendingCalls = typeof pendingCallsCount !== "undefined" ? pendingCallsCount : 0;
+    const activeCalls = typeof onRescueCount !== "undefined" ? onRescueCount : 0;
+    const completedCalls = typeof completedCount !== "undefined" ? completedCount : 0;
+%>
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Driver Dashboard</h1>
+            <p>Welcome to the Prayas Bike Ambulance Driver Portal.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-cards">
+
+        <div class="dash-card">
+            <h3>Assigned Calls</h3>
+            <h2><%= assignedCalls %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Pending</h3>
+            <h2><%= pendingCalls %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>On Rescue</h3>
+            <h2><%= activeCalls %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Completed</h3>
+            <h2><%= completedCalls %></h2>
+        </div>
+
+    </div>
+
+    <div class="dashboard-actions">
+
+        <a href="/driver-calls" class="action-btn">
+            View Assigned Calls
+        </a>
+
+        <a href="/driver-status" class="action-btn secondary">
+            Update Status
+        </a>
+
+        <a href="/driver-treatment" class="action-btn secondary">
+            Treatment Update
+        </a>
+
+        <a href="/driver-workflow" class="action-btn secondary">
+            Open Rescue Workflow
+        </a>
+
+    </div>
+
+</section>
+
+<script>
+    setInterval(function () {
+        location.reload();
+    }, 10000);
+</script>
+
+<%- include("../partials/footer") %>

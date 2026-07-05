@@ -1,0 +1,312 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<% const ambulanceList = typeof ambulances !== "undefined" ? ambulances : []; %>
+
+<section class="page-section">
+    <div class="page-header">
+        <div>
+            <h1>Bike Ambulance Management</h1>
+            <p>Manage all Prayas bike ambulances, rescue ambulances and their current status.</p>
+        </div>
+
+        <button class="primary-btn" onclick="openAmbulanceModal()">+ Add Ambulance</button>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="dash-card">
+            <h3>Total Ambulance</h3>
+            <h2><%= ambulanceList.length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Available</h3>
+            <h2><%= ambulanceList.filter(a => a.status === "Available").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Busy</h3>
+            <h2><%= ambulanceList.filter(a => a.status === "Busy").length %></h2>
+        </div>
+
+        <div class="dash-card">
+            <h3>Maintenance</h3>
+            <h2><%= ambulanceList.filter(a => a.status === "Maintenance").length %></h2>
+        </div>
+    </div>
+
+<div style="margin:20px 0;">
+    <input
+        type="text"
+        id="ambulanceSearch"
+        placeholder="Search Ambulance by ID, Driver, Mobile or Location..."
+        style="
+            width:400px;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:16px;
+        ">
+</div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vehicle</th>
+                <th>Driver</th>
+                <th>Mobile</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (ambulanceList.length === 0) { %>
+                <tr>
+                    <td colspan="7">No ambulance added yet.</td>
+                </tr>
+            <% } %>
+
+            <% ambulanceList.forEach(item => { %>
+                <tr>
+                    <td><%= item.ambulanceId %></td>
+                    <td><%= item.vehicleType %></td>
+                    <td><%= item.driverName %></td>
+                    <td><%= item.driverMobile %></td>
+
+                    <td>
+                        <% if (item.status === "Available") { %>
+                            <span class="status available">Available</span>
+                        <% } else if (item.status === "Busy") { %>
+                            <span class="status busy">Busy</span>
+                        <% } else { %>
+                            <span class="status pending">Maintenance</span>
+                        <% } %>
+                    </td>
+
+                    <td><%= item.location %></td>
+
+                    <td>
+                        <button
+                            class="edit-btn"
+                            onclick="openEditAmbulanceModal('<%= item._id %>', '<%= item.ambulanceId %>', '<%= item.vehicleType %>', '<%= item.driverName %>', '<%= item.driverMobile %>', '<%= item.status %>', '<%= item.location %>')">
+                            Edit
+                        </button>
+
+                        <a href="/ambulance/delete/<%= item._id %>"
+                           class="delete-btn"
+                           onclick="return confirmDelete(event, this.href, 'ambulance')"
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</section>
+
+<div class="modal-overlay" id="ambulanceModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Add Ambulance</h2>
+            <button onclick="closeAmbulanceModal()">×</button>
+        </div>
+
+        <form class="modal-form" action="/ambulance/add" method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ambulance ID</label>
+                    <input type="text" name="ambulanceId" placeholder="BA-003" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ambulance Type</label>
+                    <select name="vehicleType" required>
+                        <option value="Bike Ambulance">Bike Ambulance</option>
+                        <option value="Rescue Ambulance">Rescue Ambulance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" name="driverName" placeholder="Enter driver name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Driver Mobile</label>
+                    <input type="text" name="driverMobile" placeholder="Enter mobile number" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <input type="text" name="location" placeholder="Enter current location" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Available">Available</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeAmbulanceModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Ambulance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editAmbulanceModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Edit Ambulance</h2>
+            <button onclick="closeEditAmbulanceModal()">×</button>
+        </div>
+
+        <form class="modal-form" id="editAmbulanceForm" method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ambulance ID</label>
+                    <input type="text" name="ambulanceId" id="editAmbulanceId" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ambulance Type</label>
+                    <select name="vehicleType" id="editVehicleType" required>
+                        <option value="Bike Ambulance">Bike Ambulance</option>
+                        <option value="Rescue Ambulance">Rescue Ambulance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" name="driverName" id="editDriverName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Driver Mobile</label>
+                    <input type="text" name="driverMobile" id="editDriverMobile" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <input type="text" name="location" id="editLocation" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="editStatus" required>
+                        <option value="Available">Available</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeEditAmbulanceModal()">Cancel</button>
+                <button type="submit" class="save-btn">Update Ambulance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAmbulanceModal() {
+        document.getElementById("ambulanceModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeAmbulanceModal() {
+        document.getElementById("ambulanceModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    function openEditAmbulanceModal(id, ambulanceId, vehicleType, driverName, driverMobile, status, location) {
+        document.getElementById("editAmbulanceForm").action = "/ambulance/update/" + id;
+
+        document.getElementById("editAmbulanceId").value = ambulanceId;
+        document.getElementById("editVehicleType").value = vehicleType;
+        document.getElementById("editDriverName").value = driverName;
+        document.getElementById("editDriverMobile").value = driverMobile;
+        document.getElementById("editStatus").value = status;
+        document.getElementById("editLocation").value = location;
+
+        document.getElementById("editAmbulanceModal").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeEditAmbulanceModal() {
+        document.getElementById("editAmbulanceModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+document.getElementById("ambulanceSearch").addEventListener("keyup", function () {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll(".data-table tbody tr");
+
+    rows.forEach(function(row) {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+});
+
+</script>
+
+<script>
+
+function confirmDelete(event, url, itemName){
+
+    event.preventDefault();
+
+    Swal.fire({
+        title: "Delete Ambulance?",
+        text: "This " + itemName + " will be permanently deleted.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor:"#d33",
+        cancelButtonColor:"#3085d6",
+        confirmButtonText:"Yes, Delete",
+        cancelButtonText:"Cancel"
+    }).then((result)=>{
+
+        if(result.isConfirmed){
+
+            Swal.fire({
+                icon:"success",
+                title:"Deleted!",
+                text:"Ambulance deleted successfully.",
+                timer:1200,
+                showConfirmButton:false
+            });
+
+            setTimeout(()=>{
+                window.location.href=url;
+            },1200);
+
+        }
+
+    });
+
+    return false;
+
+}
+
+</script>
+
+<%- include("../partials/footer") %>

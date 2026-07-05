@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayas Bike Ambulance System</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-bar">
+        <div>About Us | Contact Us</div>
+        <div>Emergency Rescue Helpline +91 98251 19081</div>
+    </div>
+
+    <header class="main-header">
+        <img src="/images/prayas-logo.png" alt="Prayas Logo" class="main-logo">
+
+        <div class="header-links">
+            <a href="#">Bike Ambulance</a>
+            <span>|</span>
+            <a href="#">Rescue Call</a>
+            <span>|</span>
+            <a href="#">Treatment</a>
+            <span>|</span>
+            <a href="#">Admin</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <a href="#">Home</a>
+        <a href="#">Ambulance Process</a>
+        <a href="#">New Call</a>
+        <a href="#">Drivers</a>
+        <a href="#">Reports</a>
+        <a href="#">Admin</a>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-text">
+            <h1>Bike Ambulance<br>Management System</h1>
+            <p>Manage animal rescue calls, drivers, treatments and emergency records digitally with Prayas.</p>
+        </div>
+
+        <div class="login-card">
+            <h2>Login Portal</h2>
+            <p>Select your role and continue.</p>
+
+            <div class="role-switch">
+                <button type="button" class="role-btn active" onclick="setRole('admin')">Admin</button>
+                <button type="button" class="role-btn" onclick="setRole('driver')">Driver</button>
+            </div>
+
+            <form action="/login" method="POST">
+                <input type="hidden" name="role" id="role" value="admin">
+
+                <input type="text" name="username" placeholder="Enter Username" required>
+                <input type="password" name="password" placeholder="Enter Password" required>
+
+                <button type="submit" id="loginButton">Login as Admin</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        function setRole(role) {
+            document.getElementById("role").value = role;
+
+            const buttons = document.querySelectorAll(".role-btn");
+            buttons.forEach(btn => btn.classList.remove("active"));
+
+            if (role === "admin") {
+                buttons[0].classList.add("active");
+                document.getElementById("loginButton").innerText = "Login as Admin";
+            } else {
+                buttons[1].classList.add("active");
+                document.getElementById("loginButton").innerText = "Login as Driver";
+            }
+        }
+    </script>
+
+</body>
+</html>
