@@ -149,18 +149,74 @@ app.get("/drivers", isAdmin, async (req, res) => {
 });
 
 app.post("/drivers/add", isAdmin, async (req, res) => {
-    await Driver.create(req.body);
+
+    const driver = await Driver.create(req.body);
+
+    const userExists = await User.findOne({
+        username: driver.driverId,
+        role: "driver"
+    });
+
+    if (!userExists) {
+        await User.create({
+            name: driver.name,
+            username: driver.driverId,
+            password: driver.mobile,
+            role: "driver",
+            isActive: true
+        });
+    }
+
     res.redirect("/drivers");
+
 });
 
 app.post("/drivers/update/:id", isAdmin, async (req, res) => {
-    await Driver.findByIdAndUpdate(req.params.id, req.body);
+
+    const oldDriver = await Driver.findById(req.params.id);
+
+    const updatedDriver = await Driver.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+    );
+
+    await User.findOneAndUpdate(
+        {
+            username: oldDriver.driverId,
+            role: "driver"
+        },
+        {
+            name: updatedDriver.name,
+            username: updatedDriver.driverId,
+            password: updatedDriver.mobile,
+            role: "driver",
+            isActive: true
+        },
+        {
+            upsert: true
+        }
+    );
+
     res.redirect("/drivers");
+
 });
 
 app.get("/drivers/delete/:id", isAdmin, async (req, res) => {
+
+    const driver = await Driver.findById(req.params.id);
+
+    if (driver) {
+        await User.findOneAndDelete({
+            username: driver.driverId,
+            role: "driver"
+        });
+    }
+
     await Driver.findByIdAndDelete(req.params.id);
+
     res.redirect("/drivers");
+
 });
 
 app.get("/new-call", isAdmin, async (req, res) => {
